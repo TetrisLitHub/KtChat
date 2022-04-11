@@ -1,7 +1,4 @@
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.PrintWriter
 import java.net.Socket
 import java.util.*
@@ -12,7 +9,7 @@ var socket: Socket? = null
 var inputStream: Scanner? = null
 var outputStream: PrintWriter? = null
 
-fun main() = runBlocking {
+fun main() {
     println("Kotlin Web Chat")
 
     while (name.isEmpty().or(name.isBlank())) {
@@ -27,15 +24,9 @@ fun main() = runBlocking {
 
     println("connecting to server...")
     try {
-        socket = withContext(Dispatchers.IO) {
-            Socket(server, 9876)
-        }
-        inputStream = Scanner(withContext(Dispatchers.IO) {
-            socket!!.getInputStream()
-        })
-        outputStream = PrintWriter(withContext(Dispatchers.IO) {
-            socket!!.getOutputStream()
-        })
+        socket = Socket(server, 9876)
+        inputStream = Scanner(socket!!.getInputStream())
+        outputStream = PrintWriter(socket!!.getOutputStream())
     } catch (e: Exception) {
         e.printStackTrace()
         System.err.println("\nUNABLE TO CONNECT TO SERVER. PRESS ANY KEY TO EXIT")
@@ -45,15 +36,16 @@ fun main() = runBlocking {
 
     outputStream!!.println(name) // send name to server first
 
-    val incoming = async { listenIncoming() }.start()
-    val outgoing = async { sendOutgoing()   }.start()
+    val incoming = listenIncoming().start()
+    val outgoing = sendOutgoing().start()
+
 }
 
-suspend fun listenIncoming() { while (true) {
+fun listenIncoming() = CoroutineScope(Dispatchers.IO).async{while(true) {
     // TODO: write listener
 }}
 
-suspend fun sendOutgoing() { while (true) {
+fun sendOutgoing() = CoroutineScope(Dispatchers.IO).async{while(true) {
     var dataToSend = readln()
     // TODO: write sender
 }}
