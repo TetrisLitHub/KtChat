@@ -2,6 +2,7 @@ import kotlinx.coroutines.*
 import java.io.PrintWriter
 import java.net.Socket
 import java.util.*
+import kotlin.coroutines.suspendCoroutine
 import kotlin.system.exitProcess
 
 var name = "" ; var server = ""
@@ -10,7 +11,7 @@ var inputStream: Scanner? = null
 var outputStream: PrintWriter? = null
 
 fun main() {
-    println("Kotlin Web Chat")
+    println("Kotlin Web Chat, created as a way to implement Coroutines")
 
     while (name.isEmpty().or(name.isBlank())) {
         println("enter username:")
@@ -36,16 +37,18 @@ fun main() {
 
     outputStream!!.println(name) // send name to server first
 
-    val incoming = listenIncoming().start()
-    val outgoing = sendOutgoing().start()
-
+    runBlocking {
+        val incoming = async { listenIncoming() }
+        val outgoing = async { sendOutgoing()   }
+    }
 }
 
-fun listenIncoming() = CoroutineScope(Dispatchers.IO).async{while(true) {
-    // TODO: write listener
-}}
+suspend fun listenIncoming() {
+    delay(1000)
+    println("i")
+}
 
-fun sendOutgoing() = CoroutineScope(Dispatchers.IO).async{while(true) {
-    var dataToSend = readln()
-    // TODO: write sender
-}}
+suspend fun sendOutgoing() {
+    delay(2)
+    println("s")
+}
